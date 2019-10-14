@@ -1,0 +1,62 @@
+# TODO: check if using byte would make code easier?
+
+
+class Memory:
+    # 8-bit memory
+
+    def __init__(self, size: int = 4096):   # 4KiB
+        self.memory = {}    # {0x200: 0xAF}    # {}
+        self.size = size
+
+    def get(self, address: int) -> int:
+        # address: 0x000 - 0xfff
+        # TODO: raise on outside memory
+        return self.memory.get(address, 0x00)
+
+    def get2(self, address: int) -> int:
+        return self.get(address) << 8 | self.get(address + 1)
+
+    def set(self, address: int, value: int) -> None:
+        # address: 0x000 - 0xfff
+        # value: 0x00 - 0xff
+        # TODO: raise on outside memory
+        self.memory[address] = value
+
+
+class Chip8VirtualMachine:
+
+    def __init__(self, program_start: int = 0x200):
+        self.memory = Memory()
+
+        # self.v = None   # data registers
+        # self.i = None   # address register
+
+        # 16-bit program counter
+        self.pc = program_start
+
+        # stack?
+        # fonts?
+
+    def step(self):
+        opcode = self.memory.get2(self.pc)  # big-endian
+
+        upper_nibble = opcode >> 12
+
+        ""
+        print(hex(opcode), hex(upper_nibble))
+
+        if upper_nibble == 0x0:
+            if opcode == 0x00e0:
+                print(opcode, "Display 	disp_clear() ")
+            elif opcode == 0x00ee:
+                print(opcode, "Flow 	return; ")
+            else:
+                print(opcode, "0NNN 	Call 		Calls RCA 1802 program at address NNN. Not necessary for most ROMs. ")
+        else:
+            print(opcode)
+        ""
+
+
+vm = Chip8VirtualMachine()
+print(vm)
+vm.step()

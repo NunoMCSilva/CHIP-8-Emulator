@@ -1,0 +1,14 @@
+@opcode_to_x
+@opcode_to_y
+@inc_pc
+def _8xy0(self, x: int, y: int) -> None:
+
+# hmmm, feels like a bit of meta-programming would work here
+
+------------------------
+1st test -- chip8 picture.ch8 PASSED
+needs some heavy refactoring... and getting it to run with Tkinter (or kivy...)
+Tkinter would be easier and allow me to test/code the rest
+Kivy would allow the sound part...
+
+tkinter chip8 picture passed
