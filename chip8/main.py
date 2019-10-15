@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from vm import Chip8VirtualMachine, InfiniteLoop
+from chip8.vm import Chip8VirtualMachine, InfiniteLoop
 
 
 class App(tk.Frame):
@@ -30,7 +30,7 @@ class App(tk.Frame):
         # TODO: check error no screen instructions
         # self.vm.loadf("Chip-8 Pack/Chip-8 Programs/SQRT Test [Sergey Naydenov, 2010].ch8")
 
-        self.vm.loadf("Chip-8 Pack/Chip-8 Demos/Maze [David Winter, 199x].ch8")
+        self.vm.loadf("../resources/Chip-8 Pack/Chip-8 Demos/Maze [David Winter, 199x].ch8")
         # TODO: add this to tests (store rnd instructs)...
 
         #self.vm.loadf("Chip-8 Pack/Chip-8 Demos/Maze (alt) [David Winter, 199x].ch8")

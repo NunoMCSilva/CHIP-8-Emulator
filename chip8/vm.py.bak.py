@@ -1,3 +1,86 @@
+"""
+# TODO: add docstrings
+
+import chip8.opcodes as opcodes
+
+
+class Chip8VirtualMachine:
+
+    def __init__(self, program_start: int = 0x200, memory_size = 4096):
+        # 8-bit memory
+        self.memory = None  # Chip8Memory(memory_size)
+
+        # 16-bit program counter
+        self.pc = program_start
+
+        # 8-bit data registers
+        self.v = {k: 0x00 for k in range(0xF + 1)}
+
+        # 16-bit address register
+        self.i = 0x0000
+
+        # TODO: add rest
+
+    def step(self) -> None:
+        opcode = self._get_opcode()
+
+        self._parse(opcode)
+
+        # TODO: rest
+
+    def _get_opcode(self) -> int:
+        return self.memory.get16(self.pc)
+
+    def _parse(self, opcode) -> None:
+        nibble3 = opcode >> 12
+
+        # TODO: refactor this
+        if nibble3 == 0x0:
+            self._parse_0nnn(opcode)
+        elif nibble3 == 0x1:
+            pass
+        elif nibble3 == 0x2:
+            pass
+        elif nibble3 == 0x3:
+            pass
+        elif nibble3 == 0x4:
+            pass
+        elif nibble3 == 0x5:
+            pass
+        elif nibble3 == 0x6:
+            pass
+        elif nibble3 == 0x7:
+            pass
+        elif nibble3 == 0x8:
+            pass
+        elif nibble3 == 0x9:
+            pass
+        elif nibble3 == 0xA:
+            pass
+        elif nibble3 == 0xB:
+            pass
+        elif nibble3 == 0xC:
+            pass
+        elif nibble3 == 0xD:
+            pass
+        elif nibble3 == 0xE:
+            pass
+        elif nibble3 == 0xF:
+            pass
+
+    def _parse_0nnn(self, opcode):
+        if opcode == 0x00E0:
+            opcodes.opcode_00e0(self)
+        elif opcode == 0x00EE:
+            opcodes.opcode_00ee(self)
+        else:
+            nnn=opcode & 0x0fff
+            opcodes.opcode_0nnn(self, nnn)
+"""
+
+
+"""
+# TODO: this needs a lot of refactoring...
 # TODO: add docstring
 
 import functools
@@ -5,8 +88,9 @@ import logging
 import math
 import random
 
-from memory import Chip8Memory
-from screen import Chip8Screen
+from chip8.memory import Chip8Memory
+from chip8.screen import Chip8Screen
+#import chip8.op
 
 # TODO: recheck
 FONT_SET = [
@@ -74,7 +158,7 @@ def increment_pc(func):
     return wrapper
 
 
-"""# TODO: improve this (the self part)
+""# TODO: improve this (the self part)
 def logging(func):
     @functools.wraps(func)
     def wrapper(self, *args, **kwargs):
@@ -83,7 +167,7 @@ def logging(func):
         return func(self, *args, **kwargs)
     return wrapper
 # TODO: add something like this to others (use of @ and dict with all)
-# logging.debug(f"{hex(self.pc)} - RND V{hex(x)}, {hex(nn)}")"""
+# logging.debug(f"{hex(self.pc)} - RND V{hex(x)}, {hex(nn)}")""
 
 
 class InfiniteLoop(Exception):
@@ -153,12 +237,17 @@ class Chip8VirtualMachine:
         except InfiniteLoop:
             pass
 
+    def _get_opcode(self) -> int:
+        return self.memory.get16(self.pc)   # big-endian
+
+    # TODO: ok, this one needs a lot of refactoring
     def step(self):
         # TODO: refactor
         # TODO: memory obj
         # TODO: maybe parse?
-        opcode = self.memory.get16(self.pc)   # big-endian
-        logging.debug(f"{hex(self.pc)}:{hex(opcode)}")
+
+        opcode = self._get_opcode()
+        # logging.debug(f"{hex(self.pc)}:{hex(opcode)}")
 
         # opcode parse
         nibble3 = opcode >> 12
@@ -334,6 +423,7 @@ class Chip8VirtualMachine:
     @opcode_parse
     def _0nnn(self, nnn):
         # Calls RCA 1802 program at address NNN. Not necessary for most ROMs.
+        #opcodes.opcode_0nnn(self, nnn)
         raise NotImplementedError
 
     # Conditional opcodes
@@ -563,3 +653,45 @@ if __name__ == "__main__":
     vm.loadf("Chip8 Picture.ch8")
     vm.run()
     print(vm.screen.dump_textshot())
+"""
+
+
+
+"""
+# TODO: add docstrings
+
+
+
+
+        # TODO: add timer registers
+        # TODO: stack
+        # TODO: add load font
+        # TODO: add screen
+        # TODO: add keypad
+
+    def load_program(self, program_fpath: str) -> None:
+        pass
+
+    def run(self) -> None:
+        pass
+
+    def step(self) -> None:
+        opcode = self._get_opcode()
+
+        increment_value = self._parse(opcode)
+
+        self.pc += increment_value
+
+    def _get_opcode(self) -> int:
+        return self.memory.get16(self.pc)
+
+    def _parse(self, opcode: int) -> int:
+        nibble3 = opcode >> 12
+
+        if nibble3 == 0x0:
+            pass
+        else:
+            raise NotImplementedError
+
+        return 2
+"""

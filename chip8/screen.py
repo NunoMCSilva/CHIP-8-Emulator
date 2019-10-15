@@ -1,3 +1,10 @@
+class Chip8Screen:
+
+    def clear(self):
+        pass
+
+
+"""
 # TODO: more like MockScreen, but... check model based testing
 class Chip8Screen:
     # 64 x 32 pixels
@@ -34,3 +41,4 @@ class Chip8Screen:
                 s += "X" if self.get(x, y) == 1 else " "
             s += "\n"
         return s
+"""

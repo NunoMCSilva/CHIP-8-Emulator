@@ -1,0 +1,15 @@
+"""
+def opcode_00e0(vm):
+    ""Clear the screen""
+    pass
+
+
+def opcode_00ee(vm):
+    ""Return from a subroutine""
+    pass
+
+
+def opcode_0nnn(vm, nnn):
+    ""Execute machine language subroutine at address NNN""
+    pass
+"""
