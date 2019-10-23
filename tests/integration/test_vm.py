@@ -24,7 +24,7 @@ class TestVirtualMachine:
 
         # assert
         img = vm.screen.get_screenshot()
-        img.show()
+        #img.show()
         data = list(img.getdata())
         # TODO: why does this take so long when image is diff ?, ok, it's limited to PyCharm
         assert data == expected_data
@@ -69,6 +69,7 @@ class TestVirtualMachine:
         # more arrange, then act and assert
         self._test_run__run_program__generate_expected_image(vm, program, expected_img)
 
+    @pytest.mark.skip("issues with running -- takes too long on pytest")
     def test_123(self, vm):
         program = "tests/integration/data/SQRT Test [Sergey Naydenov, 2010].ch8"
         expected_img = "tests/integration/data/SQRT Test [Sergey Naydenov, 2010].gif"

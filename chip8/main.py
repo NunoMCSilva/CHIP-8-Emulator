@@ -3,46 +3,45 @@ import tkinter as tk
 from chip8.vm import VirtualMachine, SimpleInfiniteLoop
 from chip8.screen import Screen
 
+from pubsub import pub
+
 
 class GuiScreen(tk.Canvas):
     zoom = 10
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.screen = None
+        #self.screen = None
         self.pixels = {}
 
-    def surround(self, screen):
-        self.screen = screen
-        return self
+        # here or in app?
+        pub.subscribe(self.clear, "clear")
+        pub.subscribe(self.set, "set")
+        pub.subscribe(self.unset, "unset")
+
+    #def surround(self, screen):
+        #self.screen = screen
+        #return self
 
     def clear(self):
-        #print("clear")
-        self.screen.clear()
+        self.clear()
 
     def get(self, x, y):
         #print(f"get {x} {y}")
         return self.screen.get(x, y)
 
     def set(self, x, y):
-        #print(f"set {x} {y}")
-
         # TODO: recheck this
         self.pixels[x, y] = self.create_rectangle(
             self.zoom * x, self.zoom * y,
             self.zoom * x + self.zoom, self.zoom * y + self.zoom,
             fill="white", outline="white"
         )
-        self.screen.set(x, y)
 
     def unset(self, x, y):
-        #print(f"unset {x} {y}")
-
         # TODO: recheck this
         self.delete(self.pixels[x, y])
         del self.pixels[x, y]
-
-        self.screen.unset(x, y)
 
 
 class App(tk.Frame):
@@ -74,7 +73,7 @@ class App(tk.Frame):
 
         self.vm = VirtualMachine()
         self.vm.load_program(program)
-        self.vm.screen = self._display.surround(self.vm.screen)
+        #self.vm.screen = self._display.surround(self.vm.screen)
 
         self.after(0, self._step)
 

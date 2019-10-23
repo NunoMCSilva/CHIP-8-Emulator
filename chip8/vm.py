@@ -29,10 +29,14 @@ FONT_SET = [
 
 # TODO: add dict of opcodes = mnemonics
 
-logging.basicConfig(level=logging.DEBUG)
+#logging.basicConfig(level=logging.DEBUG)
 #logging.basicConfig(level=logging.INFO)
 # TODO: the opcodes may be used in chip8 tkinter exec window?
 
+#import sys
+#from pubsub import pub
+#from pubsub.utils.notification import useNotifyByWriteFile
+#useNotifyByWriteFile(sys.stdout)
 
 class SimpleInfiniteLoop(Exception):
     pass
@@ -51,7 +55,7 @@ class VirtualMachine:
         self.keypad = KeyPad()
 
         # 16-bit program counter
-        self.pc = program_start
+        self.pc = program_start     # todo: consider replacing this by a special byte/bytes class that allows +, >, etc.
 
         # 8-bit data registers
         self.v = {k: 0x00 for k in range(0xF + 1)}
@@ -72,22 +76,13 @@ class VirtualMachine:
         # TODO: stack -- It has 16 levels, allowing 16 successive subroutine calls.
         self.stack = []     # TODO: needs beyond max exception
 
-        # TODO: fonts -- add option not to?
-        self._load_fonts()
+        # load font set
+        self.memory.load_data(0x0000, *FONT_SET)
 
-    # TODO: needs refactoring
-    def load_program(self, fname):
-        def load():
-            with open(fname, "rb") as f:
-                while True:
-                    data = f.read(1)
-                    if len(data) == 0:
-                        break
-                    yield int.from_bytes(data, 'big')
-
-        for pos, byte_ in enumerate(load(), start=0x200):
-            #print(hex(pos), byte_)
-            self.memory[pos] = byte_
+    # TODO: improve all loads and refactor them
+    def load_program(self, fpath):
+        with open(fpath, "rb") as f:
+            self.memory.load_data(0x200, *f.read())     # TODO: might still be improved
 
     # TODO: refactor
     def run(self, steps=None):
@@ -99,7 +94,7 @@ class VirtualMachine:
 
     def step(self) -> None:
         # fetch
-        opcode = self.memory.get16(self.pc)     # big-endian
+        opcode = self.memory.get_opcode(self.pc)     # big-endian
         logging.debug(f"{hex(self.pc)} - {hex(opcode)}")
 
         # parse
@@ -131,10 +126,12 @@ class VirtualMachine:
             else:
                 raise NotImplementedError
 
+    """
     def _load_fonts(self):
         # TODO: check if this is correct...
         for i, font_set_element in enumerate(FONT_SET):
             self.memory[i] = font_set_element
+    """
 
     def _parse_opcode(self, opcode):   # (self, opcode: int) -> func
         nibble3 = opcode >> 12
@@ -231,6 +228,6 @@ class VirtualMachine:
 
 if __name__ == "__main__":
     vm = VirtualMachine()
-    vm.load_program("tests/integration/data/SQRT Test [Sergey Naydenov, 2010].ch8")
+    vm.load_program("tests/integration/data/Chip8 Picture.ch8")     #SQRT Test [Sergey Naydenov, 2010].ch8")
     vm.run()
     vm.screen.get_screenshot().show()

@@ -9,6 +9,7 @@ pytest-mock = "*"
 
 [packages]
 pillow = "*"
+pypubsub = "*"
 
 [requires]
 python_version = "3.7"

@@ -1,3 +1,9 @@
+TODO: separate into model, view, presenter?
+# model.vm,memory,opcodes,keypad,audio?
+# view.display, view.main_appp
+# main_presenter?
+
+
 @opcode_to_x
 @opcode_to_y
 @inc_pc
