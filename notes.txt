@@ -12,3 +12,12 @@ Tkinter would be easier and allow me to test/code the rest
 Kivy would allow the sound part...
 
 tkinter chip8 picture passed
+
+------
+YAC8E - Yet Another Chip8 Emulator
+
+
+check opcodes according to mastering chip8 (the new reference I found) and check Octo for extra stuff (roms, etc)
+consider gif as video record
+
+use hypothesis for more testing? might be unnecessary
