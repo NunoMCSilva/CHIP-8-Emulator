@@ -2,7 +2,7 @@
 
 import pytest
 
-from chip8.memory import Memory
+from chip8_.memory import Memory
 
 
 @pytest.fixture

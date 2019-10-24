@@ -5,7 +5,7 @@ import tkinter as tk
 
 from pubsub import pub
 
-from chip8.vm import VirtualMachine, SimpleInfiniteLoop
+from chip8_.vm2 import VirtualMachine, SimpleInfiniteLoop
 
 
 # TODO: add play, stop, pause & speed control
@@ -62,7 +62,7 @@ class Presenter:
     def __init__(self):
         # model
         self._model = VirtualMachine()
-        self._model.load_program("/home/blackcat/Documentos/Projects/Programming/Miscellaneous/CHIP-8 Interpreter/Chip8/tests/integration/data/Chip8 Picture.ch8")
+        self._model.load_program("/home/blackcat/Documentos/Projects/Programming/Miscellaneous/CHIP-8 Interpreter/Chip8/tests/test_chip8_/integration/data/Chip8 Picture.ch8")
 
         # view
         self._root = tk.Tk()    # TODO: necessary?

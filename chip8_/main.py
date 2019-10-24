@@ -1,7 +1,7 @@
 import tkinter as tk
 
-from chip8.vm import VirtualMachine, SimpleInfiniteLoop
-from chip8.screen import Screen
+from chip8_.vm2 import VirtualMachine, SimpleInfiniteLoop
+from chip8_.screen import Screen
 
 from pubsub import pub
 
@@ -69,7 +69,7 @@ class App(tk.Frame):
         # TODO: glitchy and never ends?
         # program = "tests/integration/data/SQRT Test [Sergey Naydenov, 2010].ch8"
 
-        program = "tests/integration/data/Chip-8 Pack/Chip-8 Demos/Maze (alt) [David Winter, 199x].ch8"
+        program = "tests/test_chip8_/integration/data/Chip-8 Pack/Chip-8 Demos/Maze (alt) [David Winter, 199x].ch8"
 
         self.vm = VirtualMachine()
         self.vm.load_program(program)

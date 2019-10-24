@@ -1,4 +1,5 @@
-# TODO: add docstring
+# TODO: add docstrings
+
 # opcodes put here to facilitate dev
 # docstrings taken from mmttmik : Mastering CHIP-8 -- TODO: add thanks
 # TODO: instead of int can I use more specific typing?

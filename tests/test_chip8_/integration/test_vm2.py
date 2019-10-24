@@ -1,7 +1,7 @@
 from PIL import Image
 import pytest
 
-from chip8.vm import VirtualMachine, SimpleInfiniteLoop
+from chip8_.vm2 import VirtualMachine, SimpleInfiniteLoop
 
 
 @pytest.fixture
@@ -31,8 +31,8 @@ class TestVirtualMachine:
 
     def test_run__chip8_picture__generates_expected_image(self, vm):
         # arrange
-        program = "tests/integration/data/Chip8 Picture.ch8"
-        expected_img = "tests/integration/data/Chip8 Picture.gif"
+        program = "tests/test_chip8_/integration/data/Chip8 Picture.ch8"
+        expected_img = "tests/test_chip8_/integration/data/Chip8 Picture.gif"
 
         # more arrange, then act and assert
         self._test_run__run_program__generate_expected_image(vm, program, expected_img)
@@ -57,8 +57,8 @@ class TestVirtualMachine:
 
     def test_run__random_number_test_with_exit_on_wait_keypress__generates_expected_image(self, mocker, vm):
         # arrange
-        program = "tests/integration/data/Random Number Test [Matthew Mikolay, 2010].ch8"
-        expected_img = "tests/integration/data/Random Number Test [Matthew Mikolay, 2010].gif"
+        program = "tests/test_chip8_/integration/data/Random Number Test [Matthew Mikolay, 2010].ch8"
+        expected_img = "tests/test_chip8_/integration/data/Random Number Test [Matthew Mikolay, 2010].gif"
 
         def mock_wait_for_keypress():
             raise SimpleInfiniteLoop

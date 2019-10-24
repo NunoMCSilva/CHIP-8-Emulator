@@ -1,6 +1,6 @@
 import pytest
 
-from chip8.vm import VirtualMachine
+from chip8_.vm2 import VirtualMachine
 
 
 # TODO: put in TestVM?

@@ -2,10 +2,10 @@
 
 import logging
 
-from chip8.keypad import KeyPad
-from chip8.memory import Memory
-import chip8.opcodes as opcodes
-from chip8.screen import Screen
+from chip8_.keypad import KeyPad
+from chip8_.memory import Memory
+import chip8_.opcodes as opcodes
+from chip8_.screen import Screen
 
 # TODO: recheck
 FONT_SET = [
@@ -29,14 +29,14 @@ FONT_SET = [
 
 # TODO: add dict of opcodes = mnemonics
 
-#logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
 #logging.basicConfig(level=logging.INFO)
-# TODO: the opcodes may be used in chip8 tkinter exec window?
+# TODO: the opcodes may be used in chip8_ tkinter exec window?
 
-#import sys
-#from pubsub import pub
-#from pubsub.utils.notification import useNotifyByWriteFile
-#useNotifyByWriteFile(sys.stdout)
+import sys
+from pubsub import pub
+from pubsub.utils.notification import useNotifyByWriteFile
+useNotifyByWriteFile(sys.stdout)
 
 class SimpleInfiniteLoop(Exception):
     pass
@@ -81,6 +81,8 @@ class VirtualMachine:
 
     # TODO: improve all loads and refactor them
     def load_program(self, fpath):
+        print("x")
+        logging.debug(f"vm.load_program({fpath})")
         with open(fpath, "rb") as f:
             self.memory.load_data(0x200, *f.read())     # TODO: might still be improved
 
@@ -228,6 +230,6 @@ class VirtualMachine:
 
 if __name__ == "__main__":
     vm = VirtualMachine()
-    vm.load_program("tests/integration/data/Chip8 Picture.ch8")     #SQRT Test [Sergey Naydenov, 2010].ch8")
+    vm.load_program("tests/test_chip8_/integration/data/Chip8 Picture.ch8")     #SQRT Test [Sergey Naydenov, 2010].ch8")
     vm.run()
     vm.screen.get_screenshot().show()
