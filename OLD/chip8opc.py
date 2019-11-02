@@ -1,3 +1,4 @@
+"""
 opcode_2nnn: lambda _, nnn: f"call {nnn}",
 opcode_3nnn: lambda _, x, nn: f"SE V{x}, {nn}",  # f"skip next if V{hex(x)[-1]} == {hex(nn)}",
 opcode_4nnn: lambda _, x, nn: f"SNE V{x}, {nn}",  # f"skip next if V{hex(x)[-1]} != {hex(nn)}",
@@ -31,3 +32,4 @@ opcode_fx29: lambda _, x: f"LD F, V{x}",  # f"I = sprite_data(V{hex(x)[-1]})",
 opcode_fx33: lambda _, x: f"LD B, V(x}",  # f"memory[I:] = BCD(V{hex(x)[-1]})",
 opcode_fx55: lambda _, x: f"LD [I], V{x}",  # f"memory[I:] = V[0:hex(x)[-1]nclusive]; I = I + hex(x) + 1",
 opcode_fx65: lambda _, x: f"LD Vx, [i]",  # f"V[0:hex(x)[-1]nclusive] = memory[I:]; I = I + hex(x) + 1",
+"""
