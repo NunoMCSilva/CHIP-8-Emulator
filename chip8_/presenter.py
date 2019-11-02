@@ -1,70 +1,97 @@
+# TODO: add docstrings
+
+# libraries
 from pubsub import pub
 
-# TODO: from chip8_.vm import VirtualMachine
-from chip8_.vm2 import VirtualMachine
+from chip8_.model import Model
 from chip8_.view import get_view
 
 
+# code
 class Presenter:
 
     def __init__(self):
-        self._model = VirtualMachine()
+        self._model = Model()
         self._view = get_view()
         self._subscribe_to_listeners()
 
-    def run(self):
+    def run(self) -> None:
         self._view.run()
 
-    def _subscribe_to_listeners(self):
-        # subscribe events from model
+    def _subscribe_to_listeners(self) -> None:
+        # subscribe to topics from model
         pass
 
-        # subscribe events from view
-        pub.subscribe(self._model.load_program, "view.open")
-        pub.subscribe(self._model.step, "view.step")
+        # subscribe to topics from view
+        pub.subscribe(self._model.on_keypress, "view.on_keypress")
+        pub.subscribe(self._model.on_step, "view.on_step")
+
+
+
+import sys
+from pubsub.utils.notification import useNotifyByWriteFile
+useNotifyByWriteFile(sys.stdout)
 
 
 """
-        self._model.load_program("/home/blackcat/Documentos/Projects/Programming/Miscellaneous/CHIP-8 Interpreter/Chip8/tests/integration/data/Chip8 Picture.ch8")
+# TODO: add docstrings
 
-        # view
-        self._root = tk.Tk()    # TODO: necessary?
-        self._view = View(self._root)
+# libraries
+import logging
 
-        # subscribe events from model
-        #pub.subscribe(self._on_model_screen_clear, "model.screen.clear")
-        pub.subscribe(self._view.clear, "model.screen.clear")
-        #pub.subscribe(self._on_model_screen_set, "model.screen.set")
-        pub.subscribe(self._view.set, "model.screen.set")
-        #pub.subscribe(self._on_model_screen_unset, "model.screen.unset")
-        pub.subscribe(self._view.unset, "model.screen.unset")
-        #pub.subscribe(self._on_model_infinite_loop, "model.infinite_loop")
-        pub.subscribe(self._view.infinite_loop, "model.infinite_loop")
 
-        # subscribe events from view
+
+from chip8.model.vm import VirtualMachine
+from chip8.view import get_view
+
+
+# debug
+debug = True
+if debug:
+    logging.basicConfig(level=logging.DEBUG)
+
+    #import sys
+    #from pubsub.utils.notification import useNotifyByWriteFile
+    #useNotifyByWriteFile(sys.stdout)
+
+
+
+        logging.debug("presenter.run()")
+        
+
+    def _subscribe_to_listeners(self) -> None:
+        # subscribe to topics from model
+        pub.subscribe(self._view.screen_clear, "model.screen.clear")
+        pub.subscribe(self._view.screen_set, "model.screen.set")
+        pub.subscribe(self._view.screen_unset, "model.screen.unset")
+        pub.subscribe(self._view.on_model_stop, "model.stop")
+        pub.subscribe(self._view.on_wait_for_keypress, "model.wait_for_keypress")   # TODO: experimental
+
+        # subscribe to topics from view
+        pub.subscribe(self._on_view_open, "view.open")
         pub.subscribe(self._on_view_step, "view.step")
+        pub.subscribe(self._on_view_keypress, "view.keypress")
 
-    ""
-    def _on_model_screen_clear(self):
-        self._view.clear()
+    def _on_view_open(self, fpath: str) -> None:
+        # init vm with program file
+        logging.debug(f"presenter.on_view_open({fpath})")
+        self._model = VirtualMachine(program_fpath=fpath)
 
-    def _on_model_screen_set(self, x, y):
-        self._view.set(x, y)
+    def _on_view_step(self) -> None:
+        # step 1 instruction (if necessary init vm without program file)
+        logging.debug("presenter.on_view_step()")
 
-    def _on_model_screen_unset(self, x, y):
-        self._view.unset(x, y)
+        # TODO: just use an exception of some sort
+        #if self._model is None:
+            #self._model = VirtualMachine()
 
-    def _on_model_infinite_loop(self):
-        self._view.infinite_loop()""
+        self._model.step()
 
-    # TODO: add tests to model -- pub.send...
-    def _on_view_step(self):
-        try:
-            self._model.step()
-        except SimpleInfiniteLoop:
-            print('simple infinite loop')
-            pub.sendMessage("model.infinite_loop")
-
-    def run(self):
-        self._view.run()
+    # TODO: hmmm, really need to think about these -- keypress is currently working, but it's an ugly workaround
+    def _on_view_keypress(self, keypress):
+        # ok, I can put in v[x], but can I find a way of returning that function? -- promises?
+        print(keypress)
+        x, vx = self._model.on_view_keypress(keypress)
+        self._model.change_v(x, vx)
+        self._view.restart()
 """

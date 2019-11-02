@@ -1,15 +1,23 @@
 # TODO: add docstring
 
+# libraries
 import logging
 
+
+# constants
 MEMORY_SIZE = 4 * 1024  # 4KiB
 
-logging.basicConfig(level=logging.DEBUG)
+
+# debug
+debug = True
+if debug:
+    logging.basicConfig(level=logging.DEBUG)    # TODO: necessary?
 
 
+# code
 class Memory(bytearray):
 
-    def __init__(self, size: int = MEMORY_SIZE):   # 4KiB
+    def __init__(self, size: int = MEMORY_SIZE):
         super().__init__(size)
 
     # TODO: add "pretty print" __str__
@@ -21,6 +29,18 @@ class Memory(bytearray):
     def load_data(self, start, *args) -> None:
         # load list of bytes to memory
         self[start:start+len(args)] = args
-        logging.debug(f"model:vm:memory:{len(args)} byte(s) program loaded to memory")
+        logging.debug(f"model.vm.memory:{len(args)} byte(s) program loaded to memory")
 
-    # TODO: add save, load, load_opcodes
+    # mostly for testing
+    def load_opcodes(self, start, *args):
+        # load list of opcodes to memory
+
+        # TODO: check if this can be refactored further
+        def opcode_to_bytes():
+            for opcode in args:
+                yield (opcode & 0xff00) >> 8
+                yield opcode & 0x00ff
+
+        self.load_data(start, *opcode_to_bytes())
+
+    # TODO: add save, load

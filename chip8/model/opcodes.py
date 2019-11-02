@@ -1,13 +1,192 @@
 # TODO: add docstrings
+# TODO: is hypothesis useful here?
 
 # opcodes put here to facilitate dev
 # docstrings taken from mmttmik : Mastering CHIP-8 -- TODO: add thanks
 # TODO: instead of int can I use more specific typing?
 
+
+# libraries
 import math
 import random
+#from typing import Callable
 
 
+# code
+def parse(opcode: int): # -> Callable:
+    # parses opcode and returns appropriate function
+
+    nibble3 = opcode >> 12
+
+    # TODO: improve this
+    if nibble3 == 0x0:
+        if opcode == 0x00e0:
+            return opcode_00e0  # TODO: use partial for self?
+        elif opcode == 0x00ee:
+            return opcode_00ee
+        else:
+            return opcode_0nnn
+    elif nibble3 == 0x1:
+        return opcode_1nnn
+    elif nibble3 == 0x2:
+        return opcode_2nnn
+    elif nibble3 == 0x3:
+        return opcode_3nnn
+    elif nibble3 == 0x4:
+        return opcode_4nnn
+    elif nibble3 == 0x5:
+        nibble0 = opcode & 0x000f
+
+        if nibble0 == 0x0:
+            return opcode_5xy0
+    elif nibble3 == 0x6:
+        return opcode_6xnn
+    elif nibble3 == 0x7:
+        return opcode_7xnn
+    elif nibble3 == 0x8:
+        nibble0 = opcode & 0x000f
+
+        if nibble0 == 0x0:
+            return opcode_8xy0
+        elif nibble0 == 0x1:
+            return opcode_8xy1
+        elif nibble0 == 0x2:
+            return opcode_8xy2
+        elif nibble0 == 0x3:
+            return opcode_8xy3
+        elif nibble0 == 0x4:
+            return opcode_8xy4
+        elif nibble0 == 0x5:
+            return opcode_8xy5
+        elif nibble0 == 0x6:
+            return opcode_8xy6
+        elif nibble0 == 0x7:
+            return opcode_8xy7
+        elif nibble0 == 0xE:
+            return opcode_8xye
+    elif nibble3 == 0x9:
+        nibble0 = opcode & 0x000f
+
+        if nibble0 == 0x0:
+            return opcode_9xy0
+    elif nibble3 == 0xA:
+        return opcode_annn
+    elif nibble3 == 0xB:
+        return opcode_bnnn
+    elif nibble3 == 0xC:
+        return opcode_cxnn
+    elif nibble3 == 0xD:
+        return opcode_dxyn
+    elif nibble3 == 0xE:
+        byte0 = opcode & 0x00ff
+
+        if byte0 == 0x9E:
+            return opcode_ex9e
+        elif byte0 == 0xA1:
+            return opcode_exa1
+    elif nibble3 == 0xF:
+        byte0 = opcode & 0x00ff
+
+        if byte0 == 0x07:
+            return opcode_fx07
+        elif byte0 == 0x0A:
+            return opcode_fx0a
+        elif byte0 == 0x15:
+            return opcode_fx15
+        elif byte0 == 0x18:
+            return opcode_fx18
+        elif byte0 == 0x1E:
+            return opcode_fx1e
+        elif byte0 == 0x29:
+            return opcode_fx29
+        elif byte0 == 0x33:
+            return opcode_fx33
+        elif byte0 == 0x55:
+            return opcode_fx55
+        elif byte0 == 0x65:
+            return opcode_fx65
+
+    raise NotImplementedError(hex(opcode))
+
+
+def add_args(self, func, opcode):
+    # TODO: needs some work
+    # checks function and generates necessary args
+
+    # TODO: put this in opcodes?
+    for arg in func.__code__.co_varnames[:func.__code__.co_argcount]:
+        if arg == "self":
+            yield self
+        elif arg == "nnn":
+            yield opcode & 0x0fff
+        elif arg == "nn":
+            yield opcode & 0x00ff
+        elif arg == "x":
+            yield (opcode & 0x0f00) >> 8
+        elif arg == "y":
+            yield (opcode & 0x00f0) >> 4
+        elif arg == "n":
+            yield opcode & 0x000f
+        else:
+            raise NotImplementedError
+
+
+def get_mnemonic(func, args):
+    # experimental mnemonic (for debug logging)
+    # TODO: args -- convert to hex already...
+    # TODO: needs work
+    ops = {
+        # TODO: better opcodes -- check cowgod?
+
+        opcode_0nnn: lambda _, nnn: f"SYS {nnn}",
+        opcode_00e0: lambda _: f"CLS",
+        opcode_00ee: lambda _: f"RET",
+        opcode_1nnn: lambda _, nnn: f"JP {nnn}",
+        opcode_2nnn: lambda _, nnn: f"call {nnn}",
+        opcode_3nnn: lambda _, x, nn: f"SE V{x}, {nn}",
+        opcode_4nnn: lambda _, x, nn: f"SNE V{x}, {nn}",
+        opcode_5xy0: lambda _, x, y: f"SE V{x}, V{y}",
+        opcode_6xnn: lambda _, x, nn: f"LD V{x}, {nn}",
+        opcode_7xnn: lambda _, x, nn: f"ADD V{x}, {nn}",
+        opcode_8xy0: lambda _, x, y: f"LD V{x}, V{y}",
+        opcode_8xy1: lambda _, x, y: f"OR V{x}, V{y}",
+        opcode_8xy2: lambda _, x, y: f"AND V{x}, V{y}",
+        opcode_8xy3: lambda _, x, y: f"XOR V{x}, V{y}",
+        opcode_8xy4: lambda _, x, y: f"ADD V{x}, V{y}",
+        opcode_8xy5: lambda _, x, y: f"SUB V{x}, V{y}",
+        opcode_8xy6: lambda _, x, y: f"SHR V{x}, V{y}",
+        opcode_8xy7: lambda _, x, y: f"SUBN V{x}, V{y}",
+        opcode_8xye: lambda _, x, y: f"SHL V{x}, V{y}",
+        opcode_9xy0: lambda _, x, y: f"SNE V{x}, V{y}",
+        opcode_annn: lambda _, nnn: f"LD I, {nnn}",
+        opcode_bnnn: lambda _, nnn: f"JP V0, {nnn}",
+        opcode_cxnn: lambda _, x, nn: f"RND V{x}, {nn}",
+        opcode_dxyn: lambda _, x, y, n: f"DRW V{x}, V{y}, {n}",
+        opcode_ex9e: lambda _, x: f"SKP V{x}",
+        opcode_exa1: lambda _, x: f"SKNP V{x}",
+        opcode_fx07: lambda _, x: f"LD V{x}, DT",
+        opcode_fx0a: lambda _, x: f"LD V{x}, K",
+        opcode_fx15: lambda _, x: f"LD DT, V{x}",
+        opcode_fx18: lambda _, x: f"LD ST, V{x}",
+        opcode_fx1e: lambda _, x: f"ADD I, V{x}",
+        opcode_fx29: lambda _, x: f"LD F, V{x}",
+        opcode_fx33: lambda _, x: f"LD B, V{x}",
+        opcode_fx55: lambda _, x: f"LD [I], V{x}",
+        opcode_fx65: lambda _, x: f"LD Vx, [i]",
+    }
+
+    # TODO: check diff param, args
+    # hex it
+    new_args = []
+    for arg, param in zip(func.__code__.co_varnames[:func.__code__.co_argcount], args):
+        if arg != "self":
+            param = hex(param)
+        new_args.append(param)
+
+    return ops[func](*new_args)  # TODO: two *, check performance
+
+
+# code -- opcodes
 def opcode_0nnn(self, nnn) -> None:
     """0NNN Execute machine language subroutine at address NNN"""
     raise NotImplementedError
@@ -20,7 +199,7 @@ def opcode_00e0(self) -> None:
 
 def opcode_00ee(self) -> int:
     """00EE	Return from a subroutine"""
-    return self.stack.pop()
+    return self.stack.pop() + 2
     # TODO: will needs 16max limit and test
 
 
@@ -221,7 +400,7 @@ def opcode_fx07(self, x) -> None:
 
 def opcode_fx0a(self, x) -> None:
     """FX0A Wait for a keypress and store the result in register VX"""
-    self.v[x] = self.keypad.wait_for_keypress()
+    self.v[x] = self.keypad.wait_for_keypress1(x)     # TODO: to work with guit, may need workaround (instead of return, fill v[x] outside)
 
 
 def opcode_fx15(self, x) -> None:

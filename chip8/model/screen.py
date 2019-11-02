@@ -1,12 +1,17 @@
 # TODO: add docstring
+
+# libraries
 # TODO: add screenshot PIL
 
 from pubsub import pub
 
+
+# constants
 WIDTH = 64
 HEIGHT = 32
 
 
+# code
 class Screen:
 
     def __init__(self, width=WIDTH, height=HEIGHT):

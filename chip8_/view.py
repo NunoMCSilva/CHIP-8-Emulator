@@ -1,103 +1,68 @@
-import logging
+# TODO: add docstrings
+
+# libraries
 import tkinter as tk
-from tkinter import filedialog
 
 from pubsub import pub
 
-logging.basicConfig(level=logging.DEBUG)
 
-
-# TODO: better logging messages
+# code
 class View(tk.Frame):
 
-    def __init__(self, master, zoom=10):
+    def __init__(self, master):
         super().__init__(master)
         self._master = master
 
         self._configure_gui()
         self._create_widgets()
-        #self._initialize()
+        self._bind_events()
 
-    def run(self):
+        self._running = False
+
+    def run(self) -> None:
         self.mainloop()
 
-    def _configure_gui(self):
+    def _configure_gui(self) -> None:
         self._master.title('CHIP-8 Interpreter')
 
-    def _create_widgets(self):
-        # top menu
-        self._menu = tk.Menu(self._master)
-        self._menu.add_command(label="Open...", command=self._on_open)     # TODO: use ... or not?
-        self._master.config(menu=self._menu)
-
-        # middle screen
-        self._display = tk.Canvas(self._master, width=640, height=320, bg="black")  # TODO: adjustable zoom
-        self._display.pack()
-
+    def _create_widgets(self) -> None:
         # bottom buttons
         self._buttons = tk.Frame(self._master)
         self._buttons.pack()
 
-        self._buttons_play = tk.Button(self._buttons, text="Play", command=self._on_play)
-        self._buttons_play.grid(row=0, column=0)
+        # TODO: have this turned off until load is done
+        # TODO: change to stop on click then back
+        #self._buttons_play = tk.Button(self._buttons, text="Play", command=self._on_play, state="disabled")
+        #self._buttons_play.grid(row=0, column=0)
 
-        self._buttons_pause = tk.Button(self._buttons, text="Pause", command=self._on_pause)
-        self._buttons_pause.grid(row=0, column=1)
+        #self._buttons_stop = tk.Button(self._buttons, text="Stop", command=self._on_stop, state="disabled")
+        #self._buttons_stop.grid(row=0, column=1)
 
-        self._buttons_step = tk.Button(self._buttons, text="Step", command=self._on_step)
-        self._buttons_step.grid(row=0, column=2)
+    def _bind_events(self) -> None:
+        self._master.bind("<Key>", lambda event: pub.sendMessage("view.keypress", key=event.keysym))
 
-        self._buttons_stop = tk.Button(self._buttons, text="Stop", command=self._on_stop)
-        self._buttons_stop.grid(row=0, column=3)
+    def _on_step(self) -> None:
+        if self._running:
+            pub.sendMessage("view.step")
+            self.after(1000 // 60,
+                       self._on_step)
 
-        self._buttons_screenshot = tk.Button(self._buttons, text="Screenshot", command=self._on_screenshot)
-        self._buttons_screenshot.grid(row=0, column=4)
+    """
+    # TODO: think correctly what play, pause and stop do (details)
+    def _on_play(self) -> None:
+        self._running = True
+        self._buttons_play.config(text="Pause", command=self._on_pause)
+        self.after(0, self._on_step)
 
-        # TODO: implement this later?
-        """
-        self._screen_capture_start_button = tk.Button(text="Screen Capture Start")
-        self._screen_capture_start_button.pack()
+    def _on_pause(self) -> None:
+        self._running = False
+        self._buttons_play.config(text="Play", command=self._on_play)
 
-        self._screen_capture_stop_button = tk.Button(text="Screen Capture Start")
-        self._screen_capture_stop_button.pack()
-        """
-        # TODO: add speed adjuster
-
-    # TODO: remove after testing
-    def _initialize(self):
-        logging.debug("view.initialize")
-
-        fpath = "tests/integration/data/Chip8 Picture.ch8"
-        logging.debug(f"view.open:{fpath}")
-        pub.sendMessage("view.open", fpath=fpath)
-
-    def _on_open(self):
-        logging.debug("view.open")
-        fpath = filedialog.askopenfilename(
-            initialdir="tests/integration/data/",   # TODO: elsewhere?
-            title="Select file",
-            filetypes=(("chip8_ files", "*.ch8"), ("all files","*.*"))
-        )
-        logging.debug(f"view.open:{fpath}")
-        pub.sendMessage("view.open", fpath=fpath)
-
-    def _on_play(self):
-        logging.debug("view.on_play")
-        # TODO: pub.sendMessage("view.play")
-        # TODO: self.after(0, self._step)
-
-    def _on_pause(self):
-        print("TODO: pause")   # TODO: implement
-
-    def _on_step(self):
-        logging.debug("view.on_step")
-        pub.sendMessage("view.step")
-
-    def _on_stop(self):
-        print("TODO: stop")   # TODO: implement
-
-    def _on_screenshot(self):
-        print("TODO: screenshot")   # TODO: implement
+    def _on_stop(self) -> None:
+        self._running = False
+        # TODO: change button_play
+        # TODO: pub.sendMessage("view.on_stop")
+    """
 
 
 def get_view() -> View:
@@ -107,36 +72,124 @@ def get_view() -> View:
 
 
 """
-# TODO: add play, stop, pause & speed control
-class View(tk.Frame):
-        self.zoom = zoom
-        self.pixels = {}
-        self.stop = False
+# libraries
+import logging
 
-    def _step(self):
-        pub.sendMessage("view.step")
-        if not self.stop:
-            self.after(1000 // 60, self._step)
+from tkinter import filedialog
 
-    def run(self):
-        self.after(0, self._step)
-        self.mainloop()
 
-    def clear(self):
-        #self._display.clear()
-        pass
 
-    def set(self, x, y):
-        self.pixels[x, y] = self._display.create_rectangle(
-            self.zoom * x, self.zoom * y,
-            self.zoom * x + self.zoom, self.zoom * y + self.zoom,
+
+# debug
+# TODO: also necessary here?
+debug = True
+if debug:
+    logging.basicConfig(level=logging.DEBUG)
+
+
+
+
+    def __init__(self, master, zoom=10):
+        super().__init__(master)
+
+
+        self._zoom = zoom
+
+
+
+        self._pixels = {}   # screen elements in _screen
+        self._playing = False  # is it playing?
+
+        # TODO: experimental
+        self._waiting_keypress = False
+        self._master.bind("<Key>", self._on_keypress)
+
+
+    def screen_clear(self) -> None:
+        # clear screen
+        # TODO: verify if it's possible to get this values from tk.Canvas itself
+        for x, y in self._pixels:
+            self._screen.delete(self._pixels[x, y])
+        logging.debug("view.screen.clear()")
+
+    def screen_set(self, x: int, y: int) -> None:
+        # set screen pixel
+        # TODO: recheck this
+        self._pixels[x, y] = self._screen.create_rectangle(
+            self._zoom * x, self._zoom * y,
+            self._zoom * x + self._zoom, self._zoom * y + self._zoom,
             fill="white", outline="white"
         )
 
-    def unset(self, x, y):
-        self._display.delete(self.pixels[x, y])
-        del self.pixels[x, y]
+    def screen_unset(self, x: int, y: int) -> None:
+        # unset screen pixel
+        x = x % 64
+        y = y % 32
+        self._screen.delete(self._pixels[x, y])
+        del self._pixels[x, y]
 
-    def infinite_loop(self):
-        self.stop = True
+    def on_model_stop(self) -> None:
+        # model has stopped
+        self._playing = False
+
+    def on_wait_for_keypress(self) -> None:
+        # wait for keypress
+        self._playing = False   # TODO: check if need to stop after
+        self._waiting_keypress = True
+        logging.debug("view.on_wait_for_keypress()")
+        # TODO: check event
+
+    def restart(self):
+        #self._playing = True
+        self._waiting_keypress = False
+        self._on_play()
+
+    def _on_keypress(self, event):
+        if self._waiting_keypress:
+            logging.debug(f"view.on_keypress({event})")
+            pub.sendMessage("view.keypress", keypress=event.keysym)
+            self._waiting_keypress = False
+            # TODO: start self._playing?
+
+
+    def _create_widgets(self) -> None:
+        # TODO: add pause, screenshot, screencast, speed control, zoom control
+
+        # menu
+        self._menu = tk.Menu(self._master)
+        self._menu.add_command(label="Open...", command=self._on_open)  # TODO: use ... or not on label?
+        self._master.config(menu=self._menu)
+
+        # middle screen
+        self._screen = tk.Canvas(self._master, width=64 * self._zoom, height=32 * self._zoom, bg="black")
+        self._screen.pack()
+
+
+        self._buttons_step = tk.Button(self._buttons, text="Step", command=lambda: pub.sendMessage("view.step"))
+        self._buttons_step.grid(row=0, column=1)
+
+    def _on_open(self) -> None:
+        # TODO: improve this
+        if not debug:
+            fpath = "data/Chip8 Picture.ch8"
+        else:
+            fpath = filedialog.askopenfilename(
+                initialdir="data/",
+                title="Select file",
+                filetypes=(("chip8_ files", "*.ch8"), ("all files", "*.*")),
+            )
+        pub.sendMessage("view.open", fpath=fpath)
+
+    def _on_play(self) -> None:
+        self._playing = True
+        self.after(0, self._on_play_step)
+
+    def _on_play_step(self) -> None:
+        if self._playing:
+            pub.sendMessage("view.step")
+            if self._playing:
+                self.after(1000 // 60, self._on_play_step)
+
+
+
 """
